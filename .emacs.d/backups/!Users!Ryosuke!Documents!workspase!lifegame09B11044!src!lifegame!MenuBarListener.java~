@@ -1,0 +1,50 @@
+package lifegame;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JRadioButtonMenuItem;
+
+public class MenuBarListener implements ActionListener {
+	
+	BoardView view;
+	JRadioButtonMenuItem radioDef;
+	Boolean isDef = true;
+	
+	public MenuBarListener(BoardView v, JRadioButtonMenuItem rDef) {
+		
+		view = v;
+		radioDef = rDef;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String source = e.getActionCommand();
+		
+		if (source.equals("New") | source.equals("Default(23/3)") | source.equals("HighLife(23/36)")
+				&& !view.getStartStop()) {
+			
+			isDef = radioDef.isSelected();
+			view.restart(isDef);
+			
+		} else {
+			
+			if      (source.equals("Black"))     view.setPaintColor(Color.black);
+			else if (source.equals("Blue"))      view.setPaintColor(Color.blue);
+			else if (source.equals("Cyan"))      view.setPaintColor(Color.cyan);
+			else if (source.equals("DarkGray"))  view.setPaintColor(Color.darkGray);
+			else if (source.equals("Gray"))      view.setPaintColor(Color.gray);
+			else if (source.equals("Green"))     view.setPaintColor(Color.green);
+			else if (source.equals("LightGray")) view.setPaintColor(Color.lightGray);
+			else if (source.equals("Magenta"))   view.setPaintColor(Color.magenta);
+			else if (source.equals("Orange"))    view.setPaintColor(Color.orange);
+			else if (source.equals("Pink"))      view.setPaintColor(Color.pink);
+			else if (source.equals("Red"))       view.setPaintColor(Color.red);
+			else if (source.equals("White"))     view.setPaintColor(Color.white);
+			else if (source.equals("Yellow"))    view.setPaintColor(Color.yellow);
+		}
+	}
+
+}

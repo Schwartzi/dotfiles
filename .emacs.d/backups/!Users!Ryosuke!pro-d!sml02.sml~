@@ -1,0 +1,20 @@
+let
+    val pi = 3.14159
+    fun f r = 2.0*pi*r
+in
+    f 10.0
+end;
+
+val x = 3;
+let
+    val x = 2
+in
+    x * 4
+end * x;
+
+fun f x = x + 2;
+let
+    fun f x = x + 5
+in
+    f 4
+end * (f 2);

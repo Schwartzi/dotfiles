@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+require 'socket'
+
+MAXCLIENTS = 5
+
+member = Struct.new("name", :csock)
+
+sock = TCPServer.new(10140)
+
+while true
+  rfds = IO.select([sock, csock])[0] # すべてのイベントを待ち受ける
+  rfds.each do |d|
+    case d
+    when TCPServer     # サーバーに対するクライアントの接続があったとき
+      cs = socket.accept
+      if csock.size >= MAXCLIENTS then
+        cs.print "REQUEST REJECTED\n"
+        cs.close
+      else
+        cs.print "REQUEST ACCEPTED\n"
+      end
+
+      un = cs.gets.chomp
+      csock = member.new("#{un}", cs)
+
+    when TCPSocket     # クライアントに対するデータ入力があったとき
+      unless socket.eof?
+        socket.puts eval socket.gets
+      else
+        socket.close
+        sockets.delete(socket)
+      end
+    end
+  end
+end

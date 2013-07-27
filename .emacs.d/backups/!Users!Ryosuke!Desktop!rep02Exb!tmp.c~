@@ -1,0 +1,49 @@
+main() {
+    int MODE, COUNT, INDEX, ILM, HXREGI, INTER, OUTEND;
+    int HIST[10];
+    int SEG[7] = {01000000b, 11111001b, 00100100b, 00110000b,
+                  00011001b, 00000010b, 01111000b};
+
+    PTADD = #00000000b;  // ポートAを入力に
+    PTBDD = #11111111b;  // ポートBを出力に
+
+    MODE = COUNT = ... = 0; // 変数の初期化
+    HX   = 0;               // アドレス指定レジスタの初期化
+
+    while (PTAD != #00000000b); // コンデンサに電荷が貯まるのを待機
+
+    PTBD = #11111111b;          // LED消灯
+
+    while(1) {                             // 無限ループ
+        while (PTAD != #00000001b);        // スイッチONを待機
+        while (PTAD != #00000000b);        // スイッチOFFを待機
+
+        if        (MODE == 0) {            //  入力状態の時
+
+            INDEX = (PTAD >> 1) & #00000111b;   // ディップスイッチの値を読み取る
+            PTBD  = SEG[INDEX];                 // 7segLEDに出力
+            HIST[COUNT] = INDEX;                // 数値を保存
+            COUNT++;
+            if (INDEX == 0) || (COUNT == 10) {  // 0が入力orデータが10個
+                COUNT = 0;
+                MODE  = 1;                      // 出力状態に変更
+            }
+        } else if (MODE == 1) {            // 出力状態の時
+            SRTISC = #00010110b;           // タイマーを開始
+        }
+
+        while(OUTEND != 1);            // 出力の終了を待機
+    }
+}
+
+ON_TIMER() {
+    HXREGI = X;
+    STISC  = #01010110b;
+
+    swich HIST[COUNT] {
+    case 0 :
+        STISC = #01000000b; //タイマー停止
+        OUTEND = 1;
+        PTBD = #11111111b;
+    break;
+    case 1 : ONE[ILM] break;

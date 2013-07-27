@@ -1,0 +1,436 @@
+\documentclass{icsreport}
+
+\title{情報科学実験B 第1回レポート課題} % 題目
+\author{谷村亮介}                      % 提出者名
+\date{平成25年}                  % 提出日
+
+\課題名{開発環境の習得}     % 課題名
+\担当教官{瀬尾・石尾}                       % 担当教官名
+\所属{ソフトウェア科学コース}             % 自分の所属するコース名などを指定する.
+\学年{3年}                             % 学年
+\学籍番号{09B11044}                    % 学籍番号
+                                      % 班やグループ名.
+                                      % 必要なければ指定しなくてもよい.
+\email{u549298j@ecs.osaka-u.ac.jp}    % 電子メールのアドレス
+
+\usepackage{ascmac}
+\usepackage{here}
+\usepackage{txfonts}
+\usepackage{listings, jlisting}
+\usepackage{color}
+\usepackage[dvips]{graphicx}
+
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{colFunc}{rgb}{1,0.07,0.54}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\definecolor{Brown}{cmyk}{0,0.81,1,0.60}
+\definecolor{colID}{rgb}{0.63,0.44,0}
+
+\lstdefinelanguage{ASM}{
+morekeywords={LDHX, TXS, CLI, LDA, STA, AND, BEQ, BRA,
+              INCA, CMP, feed_watchdog},%
+morecomment=[l]{;},%
+morestring=[b]",%"
+}
+
+\renewcommand{\lstlistingname}{リスト}
+\lstset{language=ASM,
+  backgroundcolor={\color[gray]{.95}},%
+  basicstyle=\sffamily\scriptsize,
+  keywordstyle={\bfseries \color{OliveGreen}},
+  frame=tRBl,
+  framesep=5pt,
+  showstringspaces=false,
+  numbers=left,
+  stepnumber=1,
+  numberstyle=\sffamily\tiny,
+  tabsize=2
+}
+
+\begin{document}
+\maketitle
+
+\section{問題01}
+
+\subsection{問題内容}
+
+課題1で作成したプログラムの\verb+_Startup+ラベル以降の全文を示せ。
+
+\subsection{解答}
+
+課題1のソースコードを、リスト\ref{k1}に示す。
+
+\begin{lstlisting}[caption=課題1のソースコード,label=k1]
+_Startup:
+            LDHX   #__SEG_END_SSTACK ; initialize the stack pointer
+            TXS
+            CLI                      ; enable interrupts
+
+            LDA #00000000b           ; PTAを入力に
+            STA PTADD
+
+            LDA #11111111b           ; PTBを出力に
+            STA PTBDD
+
+            LDA #$01                 ; LED1 on, LED2 off
+            STA PTBD
+
+mainLoop:
+
+            LDA PTAD                 ; スイッチが押された時sw1Onに分岐
+            AND #00000001b
+            BEQ sw1On
+sw1Off:
+            LDA #01                  ; LED1  on, LED2 off
+            STA PTBD
+            BRA swEnd
+sw1On:
+            LDA #10                  ; LED1 off, LED2 on
+            STA PTBD
+swEnd:
+            feed_watchdog
+            BRA    mainLoop
+
+\end{lstlisting}
+
+%$
+
+\section{問題02}
+
+\subsection{問題内容}
+
+課題1プログラムをMCUに転送したとき、
+プログラムの実行開始直後および各命令の実行直後に おける
+CPU の A、HX、SP、PC レジスタの状態を記述せよ。
+mainLoop の実行については、スイッ チが押されている場合の動作と、
+スイッチが押されていない場合の動作をそれぞれ分けて、
+各 1 週ずつの動作を記述すること。
+
+\subsection{解答}
+
+レジスタの状態を表\ref{tab:1}に示す。
+行番号は、リスト\ref{k1}に対応する。
+
+\begin{table}
+  \centering
+  \begin{tabular}{|r || r | r | r | r|}
+\hline
+    行番号 & A & HX & SP & PC \\
+\hline
+    開始直後& 0 & 0 & FF & E000 \\
+    2      & 0 & 150 & FF & E003 \\
+    3      & 0 & 150 & 14F & E004 \\
+    4      & 0 & 150 & 14F & E005 \\
+    6      & 0 & 150 & 62  & E007 \\
+    7      & 0 & 150 & 14F & E009 \\
+    9      & FF & 150 & 14F & E00B \\
+    10     & FF & 150 & 14F & E00D \\
+    12     & 1  & 150 & 14F & E00F \\
+    13     & 1  & 150 & 14F & E011 \\
+\hline
+    ボタンOFF 17     & 1  & 150 & 14F & E013 \\
+    18     & 1  & 150 & 14F & E015 \\
+    19     & 1  & 150 & 14F & E017 \\
+    21     & 1  & 150 & 14F & E019 \\
+    22     & 1  & 150 & 14F & E01B \\
+    23     & 1  & 150 & 14F & E021 \\
+    28     & 1  & 150 & 14F & E023 \\
+    29     & 1  & 150 & 14F & E011 \\
+\hline
+   ボタンON 17     & 0  & 150 & 14F & E013 \\
+    18     & 0  & 150 & 14F & E015 \\
+    19     & 0  & 150 & 14F & E01D \\
+    25     & A  & 150 & 14F & E01F \\
+    26     & A  & 150 & 14F & E021 \\
+    28     & A  & 150 & 14F & E024 \\
+    29     & A  & 150 & 14F & E011 \\
+\hline
+  \end{tabular}
+  \caption{レジスタの状態}
+  \label{tab:1}
+\end{table}
+
+
+\section{問題03}
+
+\subsection{問題内容}
+
+課題 2 で作成したプログラムの \verb+_Startup+ ラベル以降の全文を示せ。
+
+\subsection{解答}
+
+
+
+課題2のソースコードを、リスト\ref{k2}に示す。
+
+\begin{lstlisting}[caption=課題2のソースコード,label=k2]
+_Startup:
+            LDHX   #__SEG_END_SSTACK ; initialize the stack pointer
+            TXS
+            CLI                      ; enable interrupts
+
+            LDA #00000000b           ; PTAを入力に
+            STA PTADD
+
+            LDA #11111111b           ; PTBを出力に
+            STA PTBDD
+
+            LDA #01000000b           ; [0]を出力
+            STA PTBD
+
+            LDA #00000000b
+            STA COUNT
+
+waitC:
+            LDA PTAD
+            AND #00000001b
+            BEQ waitC
+
+mainLoop:
+
+waitSw1On:
+            feed_watchdog          ; ONになるまで待つ
+            LDA PTAD
+            AND #00000001b
+            BEQ waitSw1Off
+            BRA waitSw1On
+
+waitSw1Off:
+            feed_watchdog          ; OFFになるまで待つ
+            LDA PTAD
+            AND #00000001b
+            BEQ waitSw1Off
+            BRA Sw1Off
+
+Sw1Off:
+            LDA COUNT              ; COUNT++
+            INCA
+            STA COUNT
+
+            CMP #00000001b         ; COUNTの値で分岐
+            BEQ One
+            CMP #00000010b
+            BEQ Two
+            CMP #00000011b
+            BEQ Three
+            CMP #00000100b
+            BEQ Four
+            BRA mainLoop
+
+One:
+            LDA #11111001b       ; [1]を出力
+            STA PTBD
+            BRA mainLoop
+Two:
+            LDA #01000000b       ; [0]を出力
+            STA PTBD
+            BRA mainLoop
+Three:
+            LDA #00011001b       ; [4]を出力
+            STA PTBD
+            BRA mainLoop
+Four:
+            LDA #00011001b       ; [4]を出力
+            STA PTBD
+            LDA #00000000b
+            STA COUNT            ; COUNT = 0
+            BRA mainLoop
+
+            feed_watchdog
+            BRA mainLoop
+\end{lstlisting}
+
+\section{問題04}
+
+\subsection{問題内容}
+
+課題2でのMCUと周辺装置との接続関係を図を用いて説明せよ。
+DemoボードとProjectボードを渡された人間が正しく配線を再現できるような記述であること。
+
+\subsection{解答}
+
+接続関係を示した図を、図\ref{fig:kairop}に示す。
+
+配線を再現する際の手順を以下に述べる。
+\begin{enumerate}
+\item ブレッドボードに、図で示した回路を作成する。
+\item DemoボードはProjectボードのJ7に差し込む。
+\item PTA、PTBのラベルの部分は、ProjectボードのJ5またはJ6の、
+      対応する番号の端子に接続する。
+\item PB1、VCC、GNDは、Projectボード上に同じ名前が書かれた端子があるので、
+      そこに接続する。
+\end{enumerate}
+
+以上の手順を踏めば、課題2の回路が再現できる。
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[clip,width=10.0cm]{kairo.eps}
+    \caption{回路図}
+    \label{fig:kairop}
+  \end{center}
+\end{figure}
+
+\section{問題05}
+
+\subsection{問題内容}
+
+課題 2 で作成したプログラムにおいて、
+現在表示している数字(プログラムの状態)をどのように内部で表現しているかを説明せよ。
+
+\subsection{解答}
+
+現在表示している数字は、「COUNT」という変数を用いて表現している。
+初期状態では、COUNTを0にして、0を出力する。
+ボタンが1回押されるたびに、COUNTの値を1増やし、対応する数字を表示する。
+たとえば、「1044」を表示するときは、COUNT=1の時、1を表示し、
+COUNT=2の時、0を表示する。
+COUNT=4になった時点でCOUNTを0に戻し、
+次回からは最初の数字を表示する。
+
+\section{問題06}
+
+\subsection{問題内容}
+
+アセンブラによるプログラムの経験について述べよ。
+どのような言語・開発環境や機材を用いてどのようなものを作ったことがあるか、
+その際に苦労したことや注意したこと、
+またその経験により得られたこと等を説明せよ。
+
+\subsection{解答}
+
+大学1年の授業で、CASL2で開発を行った。
+開発には、Perlで書かれた仮想環境を使用し、
+後置記法の四則演算プログラムなどを開発した。
+
+その際に苦労したことは、
+アセンブラはソースを読解しづらく、
+どこでどのような処理を行なっていたか自分でもわからなくなってしまうことや、
+プログラム設計の自由度が高く、
+単純なforループなどを実現する際にも色々な方法が考えられること、
+GOTO文のような命令を多用するため、プログラムの流れが追いづらいことなどである。
+
+これらの経験によって得られたことは、
+ソースコードには、普段より多めのコメントを付けたほうが良いこと、
+ループなどを実装する際には、先判定にするか、後判定にするかなどの仕様をきちんと決めておき、
+プログラム中で統一しておいたほうが良いこと、
+デバッグをする際には命令を1つずつ実行して、メモリやレジスタの内容を確認していくのが効率がよい、
+ということなどである。
+
+このことを意識しながら、効率よくプログラム開発を行なっていきたい。
+
+\section{問題07}
+
+\subsection{問題内容}
+
+MC9S08QGBデータシートの7章を熟読し、
+7.5節、p.70以降に記載されている表7-2.「HCS08命 令セット一覧」の読み方を解説せよ。
+命令を 1 つ選択し、その命令について表から読み取れる有用な 情報を具体例を挙げて解説すればよい。
+
+\subsection{解答}
+
+表7-2から「BEQ」命令を選択し、説明する。
+表の内容を、表\ref{tab:2} に示す。なお、ページ幅の関係から、
+ラベル名を一部略記してある。
+
+「ソース形式」には、ソースコードの書き方を示してある。
+「rel」は、この部分に分岐先のアドレスを参照するラベルまたは式を記述することを意味している。
+
+「処理」には、命令の処理内容の概要が示してある。
+「説明」に、その詳しい処理内容が示してあり、
+ここでは、Zフラグが立っていれば指定されたアドレスに分岐することが説明されている。
+
+「V」から「C」の欄は、この命令によって、各フラグの状態がどのように変化するかを示してある。
+BEQ命令では、どのフラグも変化しないことがわかる。
+
+「アドレッシングモード」とは、CPUがオペランドやデータをアクセスする方法のことである。
+「REL」は、相対アドレッシングモードを意味している。
+
+「オペコード」は、その命令に割当てられた番号である。
+CPUはこの番号で命令を識別する。
+
+「オペランド」は、被演算子を意味し、
+ここでは、相対オフセットを記入することを意味している。
+
+「バスサイクル」とは、バスを用いて情報を送信するプロトコルのことを指し、
+ここでは3回バスサイクルを起動して、情報をやりとりすることを意味している。
+バスサイクルの回数が多いと、命令の実行に時間がかかる。
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{| l | l | c | c|c|c|c|c|c| l | r | l | c|}
+\hline
+    ソース形式 & 処理 & 説明 & V & H & I  & N  & Z & C & ADM & オペC & OP & バスサイクル \\
+\hline
+\hline
+    BEQ rel & 等しければ分岐 & (Z) = 1 なら分岐 & - & - & - & - & - & - & REL & 27 & rr & 3 \\
+\hline
+  \end{tabular}
+  \caption{命令セット一覧 の例}
+  \label{tab:2}
+\end{table}
+
+\section{問題08(任意解答)}
+
+\subsection{問題内容}
+MCU からの出力が4 ビットしか 使えないとき、
+0 から 9 までの数値を 7 セグメント LED に表示するには
+MCU と 7 セグメント LED の間にどのような論理回路を作ればよいかを解説せよ。
+
+\subsection{解答}
+
+汎用ロジックIC「7447」は、4ビットの2進数を、
+7segLEDで表示できる値に変換して出力するICである。
+このICの各出力の真理値表を参照すれば、
+abcdefgの各端子の論理を導き、以下の様な最簡積和型を得ることができる。
+Dは2進数の4ビット目、Aは1ビット目に対応している。
+
+\begin{math}
+  a = \overline{D} \overline{C} B \vee
+  \overline{D} C A \vee
+  D  \overline{B} A \vee
+  \overline{C}  \overline{B}  \overline{A} \\
+  b =  \overline{D}  \overline{C} \vee
+  \overline{B}  \overline{A} \vee
+  \overline{D} B A \vee
+  D  \overline{C}  \overline{B}  \\
+  c =  \overline{C}  \overline{B} \vee
+  \overline{C} A \vee
+  \overline{D} C  \\
+  d = B \overline{A} \vee
+  \overline{C} B \vee
+  \overline{C} \overline{B} \overline{A} \vee
+  C \overline{B} A  \\
+  e = B \overline{A} \vee
+  \overline{C}\overline{B}\overline{A} \\
+  f = \overline{B}\overline{A} \vee
+  C \overline{A} \vee
+  C \overline{A}    \\
+  g = B \overline{A} \vee
+  C \overline{B} \vee
+  D \overline{B} \vee
+  \overline{C} B   \\
+\end{math}
+
+abcdefgとABCDの間にこのような論理回路を作れば良い。
+
+
+\section{問題09}
+
+\subsection{問題内容}
+
+感想や要望等を自由記述で述べよ。
+
+\subsection{解答}
+
+趣味でマイコンを用いた開発を行なっていたこともあって、
+マイコンの使い方は簡単に把握することができました。
+しかし、アセンブラを用いた開発は難しいので、
+これからの課題にも気を抜かず取り組みたいです。
+
+CodeWarriorを用いてソースコードを編集していると、
+頻繁にフリーズするのはどうにかして欲しいです。
+あるいは、自分のPCで同じ開発環境を構築する方法が知りたいです。
+
+\end{document}

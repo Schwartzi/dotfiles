@@ -1,0 +1,5 @@
+Program 100(output, input);
+
+begin
+   println('HELLO!');
+end

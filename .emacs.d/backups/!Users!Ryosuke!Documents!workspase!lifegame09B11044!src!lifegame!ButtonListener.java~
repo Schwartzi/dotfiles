@@ -1,0 +1,52 @@
+package lifegame;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
+
+public class ButtonListener implements ActionListener {
+
+	Boolean   startStop = false;
+	BoardView view;
+	private AbstractButton startButton;
+	private AbstractButton nextButton;
+	private AbstractButton undoButton;
+	
+	public ButtonListener(JButton sB, JButton nB,JButton uB, BoardView v) {	
+		
+		startButton = sB;
+		nextButton  = nB;
+		undoButton = uB;
+		view  = v;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+	   if (e.getSource() == nextButton) {
+		   
+			view.nextState();		
+			
+	   } else if (e.getSource() == undoButton) {	
+		   
+			view.oldState();		
+			
+	   } else if (e.getSource() == startButton) {
+		   
+		  startStop = !view.getStartStop();
+		  
+			if (startStop) {
+				startButton.setText("Stop");
+				nextButton.setEnabled(false);
+				undoButton.setEnabled(false);
+			} else {
+				startButton.setText("Start");
+				nextButton.setEnabled(true);
+				undoButton.setEnabled(true);
+			}
+			view.startAnimation(startStop);
+	   }
+	}
+}

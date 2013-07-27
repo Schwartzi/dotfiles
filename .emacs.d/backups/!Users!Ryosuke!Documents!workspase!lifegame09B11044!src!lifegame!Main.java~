@@ -1,0 +1,172 @@
+package lifegame;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+
+public class Main {
+
+    public static void main(String[] args) {
+        
+        //ウインドウの作成
+        final JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setTitle("Lifegame09B11044");
+            
+        //ベースパネル作成
+        final JPanel base = new JPanel();
+        frame.setContentPane(base);
+        base.setPreferredSize(new Dimension(400,400));  //希望サイズの指定
+        frame.setMinimumSize(new Dimension(400,400));   //最小サイズの指定
+        
+        //BoardView配置
+        base.setLayout(new BorderLayout());
+        final BoardView view = new BoardView();
+        base.add(view, BorderLayout.CENTER);            //baseにviewを追加
+        
+        final JPanel buttonPanel = new JPanel();        // ボタン用パネルを作成し
+        base.add(buttonPanel, BorderLayout.SOUTH);          // base の下端に配置する
+        buttonPanel.setLayout(new FlowLayout());        // java.awt.FlowLayout を使用
+        
+        //NEXTボタン配置
+        JButton nextButton = new JButton("Next");
+        buttonPanel.add(nextButton);
+        
+        //UNDOボタン配置
+        JButton undoButton = new JButton("Undo");
+        buttonPanel.add(undoButton);
+        
+        //STARTボタン配置
+        JButton startButton = new JButton("Start");
+        buttonPanel.add(startButton);
+        
+        //ActionListenerの追加
+        ButtonListener buttonListener 
+            = new ButtonListener(startButton, nextButton, undoButton, view);
+        nextButton.addActionListener(buttonListener);
+        undoButton.addActionListener(buttonListener);
+        startButton.addActionListener(buttonListener);
+        
+        //メニューバー配置
+        //File,Color
+        JMenuBar menubar = new JMenuBar();
+        frame.setJMenuBar(menubar);
+        JMenu menuFile = new JMenu("File");
+        JMenu menuColor = new JMenu("Color");
+        menubar.add(menuFile);
+        menubar.add(menuColor);
+    
+        //File -New -Def -High
+        JMenuItem menuitemNew = new JMenuItem("New");
+        menuFile.add(menuitemNew);
+        JRadioButtonMenuItem radioDef = new JRadioButtonMenuItem("Default(23/3)");
+        JRadioButtonMenuItem radioHl = new JRadioButtonMenuItem("HighLife(23/36)");
+        ButtonGroup group = new ButtonGroup();
+        group.add(radioDef);
+        group.add(radioHl);
+        radioDef.setSelected(true);
+        menuFile.add(radioDef);
+        menuFile.add(radioHl);
+        
+        //ActionListener追加        
+        MenuBarListener menuListener = new MenuBarListener(view, radioDef);
+        radioDef.addActionListener(menuListener);
+        radioHl.addActionListener(menuListener);
+        menuitemNew.addActionListener(menuListener);
+        
+        //Color   
+        ButtonGroup groupColor = new ButtonGroup();
+        JRadioButtonMenuItem radioBlack = new JRadioButtonMenuItem("Black");
+        radioBlack.setForeground(Color.black);
+        groupColor.add(radioBlack);
+        radioBlack.setSelected(true);
+        menuColor.add(radioBlack);
+        radioBlack.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioBlue  = new JRadioButtonMenuItem("Blue");        
+        radioBlue.setForeground(Color.blue);
+        groupColor.add(radioBlue);
+        menuColor.add(radioBlue);
+        radioBlue.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioCyan  = new JRadioButtonMenuItem("Cyan");        
+        radioCyan.setForeground(Color.cyan);
+        groupColor.add(radioCyan);
+        menuColor.add(radioCyan);
+        radioCyan.addActionListener(menuListener);
+
+        JRadioButtonMenuItem radioDarkGray  = new JRadioButtonMenuItem("DarkGray");        
+        radioDarkGray.setForeground(Color.darkGray);
+        groupColor.add(radioDarkGray);
+        menuColor.add(radioDarkGray);
+        radioDarkGray.addActionListener(menuListener);
+
+        JRadioButtonMenuItem radioGray  = new JRadioButtonMenuItem("Gray");        
+        radioGray.setForeground(Color.gray);
+        groupColor.add(radioGray);
+        menuColor.add(radioGray);
+        radioGray.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioGreen = new JRadioButtonMenuItem("Green");
+        radioGreen.setForeground(Color.green);
+        groupColor.add(radioGreen);
+        menuColor.add(radioGreen);
+        radioGreen.addActionListener(menuListener);
+
+        JRadioButtonMenuItem radioLightGray = new JRadioButtonMenuItem("LightGray");
+        radioLightGray.setForeground(Color.lightGray);
+        groupColor.add(radioLightGray);
+        menuColor.add(radioLightGray);
+        radioLightGray.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioMagenta = new JRadioButtonMenuItem("Magenta");
+        radioMagenta.setForeground(Color.magenta);
+        groupColor.add(radioMagenta);
+        menuColor.add(radioMagenta);
+        radioMagenta.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioOrange = new JRadioButtonMenuItem("Orange");
+        radioOrange.setForeground(Color.orange);
+        groupColor.add(radioOrange);
+        menuColor.add(radioOrange);
+        radioOrange.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioPink = new JRadioButtonMenuItem("Pink");
+        radioPink.setForeground(Color.pink);
+        groupColor.add(radioPink);
+        menuColor.add(radioPink);
+        radioPink.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioRed   = new JRadioButtonMenuItem("Red");
+        radioRed.setForeground(Color.red);
+        groupColor.add(radioRed);
+        menuColor.add(radioRed);
+        radioRed.addActionListener(menuListener);
+        
+        JRadioButtonMenuItem radioWhite = new JRadioButtonMenuItem("White");
+        radioWhite.setForeground(Color.white);
+        groupColor.add(radioWhite);
+        menuColor.add(radioWhite);
+        radioWhite.addActionListener(menuListener);
+
+        JRadioButtonMenuItem radioYellow = new JRadioButtonMenuItem("Yellow");
+        radioYellow.setForeground(Color.yellow);
+        groupColor.add(radioYellow);
+        menuColor.add(radioYellow);
+        radioYellow.addActionListener(menuListener);
+
+        frame.pack();
+        frame.setVisible(true);
+        
+    }
+}

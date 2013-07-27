@@ -1,0 +1,15 @@
+\begin{tabular}{ll}
+\hline
+フィールド & 説明 \\
+\hline
+7:TOF &  \\
+\hline
+6:TOIE &  \\
+\hline
+5:TRST &  \\
+\hline
+4:TSTP &  \\
+\hline
+3-0 &  \\
+\hline
+\end{tabular}

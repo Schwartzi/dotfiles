@@ -1,0 +1,134 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ACCEPTED   "REQUEST ACCEPTED\n"
+#define REGISTERED "USERNAME REGISTERED\n"
+
+/* --- c6 例外処理 -------- */
+void exception(int sock) {
+    close(sock);
+    printf("An exception has occurred.\n");
+    exit(1);
+}
+
+int main(int argc,char **argv) {
+
+    int  sock;
+    char rbuf[1024], *name;
+    int  nbytes = 1;
+    struct sockaddr_in host;
+    struct hostent     *hp;
+
+    fd_set rfds;       /* select() で用いるファイル記述子集合 */
+    struct timeval tv; /* select() が返ってくるまでの待ち時間を指定する変数 */
+
+    /* --- c1 初期状態 --------*/
+    /* 引数の確認 */
+    if (argc != 3) {
+        fprintf(stderr,"Usage: %s servername username\n",argv[0]);
+        exit(1);
+    }
+
+    /* ソケットの生成 */
+    if ((sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))<0) {
+        perror("socket");
+        exit(1);
+    }
+
+    /* host(ソケットの接続先) の情報設定 */
+    bzero(&host,sizeof(host));
+    host.sin_family=AF_INET;
+    host.sin_addr.s_addr=htonl(INADDR_ANY);
+    host.sin_port=htons(10140);
+
+
+    /* IPアドレスの取得 */
+    if ( ( hp = gethostbyname(argv[1]) ) == NULL ) {
+        fprintf(stderr,"unknown host: %s\n",argv[1]);
+        exit(1);
+    }
+    bcopy(hp->h_addr,&host.sin_addr,hp->h_length);
+
+    /* ホストに接続 */
+    if (connect(sock, (struct sockaddr*)&host, sizeof(host)) < 0) {
+        perror("connect");
+        exit(1);
+    } else {
+        printf("Connected to [%s]\n", hp->h_name);
+    }
+
+    /* c2 参加 */
+    if ((nbytes = read(sock, rbuf, sizeof(rbuf))) < 0) {
+        perror("read");
+    } else {
+        if (!strncmp(rbuf, ACCEPTED, strlen(ACCEPTED))) {
+            printf("%s", rbuf);
+        } else {
+            printf("ERROR! c2 : %s", rbuf);
+            exception(sock);
+        };
+    };
+
+    /* c3 ユーザー名登録 */
+    strcpy(name, argv[2]);
+    strcat(name, "\n");
+    write(sock, name, strlen(name));
+
+    if ((nbytes = read(sock, rbuf, sizeof(rbuf))) < 0) {
+        perror("read");
+    } else {
+        if (!strncmp(rbuf, REGISTERED, strlen(REGISTERED))) {
+            printf("%s", rbuf);
+        } else {
+            printf("ERROR！c3 : %s", rbuf);
+            exception(sock);
+        };
+    };
+
+
+    /* c4 メッセージ送受信 */
+    do{
+        /* 入力を監視するファイル記述子の集合を変数 rfds にセットする */
+        FD_ZERO(&rfds);     /* rfds を空集合に初期化 */
+        FD_SET(0,&rfds);    /* 標準入力 */
+        FD_SET(sock,&rfds); /* 作成したソケット */
+
+        /* 監視する待ち時間を 1 秒に設定 */
+        tv.tv_sec  = 1;
+        tv.tv_usec = 0;
+
+        /* 標準入力とソケットからの受信を同時に監視する */
+        if (select(sock+1, &rfds, NULL, NULL, &tv) > 0) {
+
+            if (FD_ISSET(0,&rfds)) { /* 標準入力から入力があったなら */
+                /* 標準入力から読み込みサーバーに送信 */
+                if ((nbytes = read(0, rbuf, sizeof(rbuf))) < 0) {
+                    perror("send");
+                } else {
+                    write(sock, rbuf, nbytes);
+                }
+            }
+
+            if (FD_ISSET(sock,&rfds)) { /* ソケットから受信したなら */
+                /* ソケットから読み込み端末に出力 */
+                if ((nbytes = read(sock, rbuf, sizeof(rbuf))) < 0) {
+                    perror("read");
+                } else {
+                    write(1,rbuf,nbytes);
+                }
+            }
+        }
+    } while(nbytes != 0);
+
+    /* c5 離脱 */
+    close(sock);
+    printf("サーバーから離脱しました。\n");
+
+    exit(0);
+}

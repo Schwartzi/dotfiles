@@ -1,0 +1,16 @@
+int main()
+{
+        int i, j;
+
+        j = 123;
+
+        i = 0;
+
+        goto L2;
+L3:
+        j += 2;
+        i++;
+L2:
+        if(i <= 10) goto L3;
+                
+        

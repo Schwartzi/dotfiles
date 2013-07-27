@@ -1,0 +1,98 @@
+use strict;
+use warnings;
+use Socket;
+
+# ---- c1 初期状態 ----------------
+
+# 引数の確認
+if (@ARGV != 2) {
+    die ("Usage: chatclient.pl servername username\n");
+}
+
+# ソケットの作成
+my $sock;
+socket($sock, PF_INET, SOCK_STREAM, getprotobyname('tcp'))
+    or die "socket: $!";
+
+# host(ソケットの接続先) の情報設定 
+my $host = $ARGV[0];
+my $packed_host = inet_aton($host)
+    or die "Cannot pack $host: $!";
+my $port = 10140;
+
+# ホスト名とポート番号をパック
+my $sock_addr = sockaddr_in($port, $packed_host)
+    or die "Cannot pack $host:$port: $!";
+
+# ホストに接続
+connect($sock, $sock_addr)
+    or die "Cannot connect $host:$port: $!";
+
+# 書き込みバッファリングをしない。
+my $old_handle = select $sock;
+$| = 1; 
+select $old_handle;
+
+
+# ---- c2 参加 ------------------ 
+my $rbuf = <$sock>;
+if ($rbuf eq "REQUEST ACCEPTED\n") { 
+    print "$rbuf";
+} else {
+    close $sock;
+    die "ERROR! c2";
+}
+
+# ---- c3 ユーザー名登録 ----------
+my $name = $ARGV[1]."\n";
+print $sock "$name";
+
+$rbuf = <$sock>;
+if ($rbuf eq "USERNAME REGISTERED\n") {
+    print "$rbuf";
+} else {
+    close $sock;
+    die "ERROR! c3";
+}
+
+# ---- c4 メッセージ送受信 --------
+my $flag = 0;
+do {
+    # 標準入力とソケットのファイル記述子を$rfdsにセット
+    my $rfds = 0;
+    vec($rfds, fileno(STDIN), 1) = 1;
+    vec($rfds, fileno($sock), 1) = 1;
+    
+    # 標準入力とソケットからの受信を同時に監視する
+    if (select($rfds, undef, undef, 1.0)) {
+
+	# 標準入力から入力があったなら
+	if (vec($rfds, fileno(STDIN), 1)) {
+	    # 標準入力から読み込みサーバーに送信
+	    if ($rbuf = <STDIN>) {
+		print $sock "$rbuf";  
+	    } else {
+		$flag = 1;
+	    }
+	}
+	
+	# ソケットから受信したなら
+	if (vec($rfds, fileno($sock), 1)) {
+	    # ソケットから読み込み端末に出力
+	    if ($rbuf = <$sock>) {
+		print "$rbuf";   
+	    } else {
+		$flag = 1;
+	    }
+	}
+    }
+} while ($flag == 0);
+
+# c5 離脱
+close $sock;
+print "closed\n";
+
+
+# 参考文献
+# http://d.hatena.ne.jp/perlcodesample/20090406/1238902770
+# http://x68000.q-e-d.net/~68user/net/echo-4.html

@@ -1,0 +1,107 @@
+\documentclass{jsarticle}
+\title{情報科学演習C 第2回レポート課題} % 題目
+\author{谷村亮介}                    % 提出者名
+\date{平成25年7月4日(木)}            % 提出日
+
+%\課題名{ネットワークプログラミングの基礎}   % 課題名
+%\担当教官{内山彰}                       % 担当教官名
+%\所属{ソフトウェア科学コース}             % 自分の所属するコース名などを指定する.
+%\学年{3年}                             % 学年
+%\学籍番号{09B11044}                    % 学籍番号
+\email{u549298j@ecs.osaka-u.ac.jp}    % 電子メールのアドレス
+
+\usepackage{ascmac}
+\usepackage{here}
+\usepackage{txfonts}
+\usepackage{listings, jlisting}
+\usepackage{color}
+\usepackage[dvips]{graphicx}
+
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{colFunc}{rgb}{1,0.07,0.54}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\definecolor{Brown}{cmyk}{0,0.81,1,0.60}
+\definecolor{colID}{rgb}{0.63,0.44,0}
+
+
+\renewcommand{\lstlistingname}{リスト}
+\lstset{language=c,
+  backgroundcolor={\color[gray]{.95}},%
+  basicstyle=\sffamily\scriptsize,
+  keywordstyle={\bfseries \color{OliveGreen}},
+  commentstyle={\itshape \color{Brown}},
+  stringstyle={\ttfamily \color{CadetBlue}},
+  frame=tRBl,
+  framesep=5pt,
+  showstringspaces=false,
+  numbers=left,
+  stepnumber=1,
+  numberstyle=\sffamily\tiny,
+  tabsize=2
+}
+
+\begin{document}
+\maketitle
+
+\section{課題3-1}
+
+\subsection{課題内容}
+
+セマフォを用いて排他制御を実現し、
+指導書2.2.1節のfile-counterプログラムが確実に正しく動作するようにせよ。
+正しい動作とは，
+「1. counter ファイルの内容が最終的に 4 になること」
+「2. 何度実行しても同じ結果になること」
+「3. file-counter プログラムが単体で動作すること」
+の条件を満たすことである。
+
+\subsection{仕様}
+
+filecounterプログラムの仕様を以下に示す。
+
+\begin{itemize}
+\item このプログラムは、引数を与えずに実行する。
+\item プログラムと同じディレクトリに「counter」というテキストファイルを生成し、「0」を書き込む。
+\item 4つのプロセスを生成し、排他制御を行いながら、
+      それぞれのプロセスがcounterの値を1加算して書き換える。
+\item すべての処理が終了した結果、counterの値は「4」となる。
+\item 以下のエラーが起こった場合は、メッセージを出力してプログラムを強制終了する。
+  \begin{itemize}
+    \item セマフォが作成できなかった時
+    \item counterというファイルの読み込みや書き込みができなかった時
+    \item プロセスが生成できなかった時
+    \item セマフォが操作できなかった時
+    \item セマフォを削除できなかった時
+\end{itemize}
+
+
+\subsection{ソースコード}
+
+\lstinputlisting[caption=simple-talk-server.c,label=sts]
+{simple-talk-server.c}
+
+
+\subsection{実装方法}
+
+
+
+\subsection{実行結果}
+
+
+\subsection{考察}
+
+
+
+
+\section{発展課題}
+
+
+
+
+
+
+\section{感想}
+
+
+\end{document}

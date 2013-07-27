@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define max 10               //最大繰り返し回数
+#define eps 1.0e-5              //収束条件
+
+double f(double x);
+double df(double x);
+void newton(void);
+
+int main()
+{
+        newton();
+
+        return 0;
+}
+
+void newton(void)
+{
+        int count;
+        double a,newa;
+
+        count=0;
+
+        printf("初期値を入力してください。\n");
+        scanf("%lf",&a);
+
+        for(;;) {
+                count++;
+
+                newa=a-f(a)/df(a);
+                printf("%d, %d\n", count, newa);
+
+                if(fabs(newa-a)<eps) break;
+
+                a=newa;
+
+                if(count==max) {
+                        printf("収束しませんでした。\n");
+                        exit(1);
+                }
+        }
+
+        printf("解の値は %f\n収束するのに %d 回かかりました。\n",
+            newa,count);
+
+}
+
+double f(double x)
+{
+        return (x - 1) ^ 2 - 3;
+}
+
+double df(double x)
+{
+        return 2 * (x - 1) - 3;
+}

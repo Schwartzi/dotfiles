@@ -1,0 +1,57 @@
+fun Power m n =
+    if m=0 then 1
+    else n * Power (m-1) n;
+
+(fn x => x + 1) 3 * 10;
+
+(fn x => x * x) 3;
+
+fun fib n =
+    if n <= 2 then 1
+    else fib(n - 1) * fib(n - 2);
+
+fun f n m = (fib n) mod m = 0;
+
+fun f2 n =
+    let val a = (fib n)
+    in fn m => a mod m = 0
+    end;
+
+fun f n =
+    fn m => (fib n) mod m = 0;
+
+fun f n m =
+    (fib n) mod m = 0;
+
+fun f n m =
+    let val a = (fib n)
+    in a mod m = 0
+    end;
+
+val x = 1;
+val y = 2 + x;
+val x = y and y = x;
+
+val x = 2;
+val y = 3;
+let
+    val x = x - 1;
+    val y = 1 + x
+    and x = (x + y) mod 3
+in
+    x + y + 2
+end;
+val y = x * 2;
+
+
+val x = 10;
+val y = 20;
+fun f x =
+    x + y;
+f 3;
+val y = 99;
+f 3;
+
+fun Power m n =
+    if m = 0 then 1
+    else n * Power(m - 1)n;

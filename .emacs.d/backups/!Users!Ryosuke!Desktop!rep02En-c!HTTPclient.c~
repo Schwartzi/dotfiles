@@ -1,0 +1,61 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc,char **argv) {
+
+    int sock, nbytes;
+    struct sockaddr_in host;
+    struct hostent *hp;
+    char rbuf[1024];
+    char *Get     = "GET http://www.ietf.org/rfc/rfc1866.txt HTTP/1.1\n";
+    char *Host    = "Host: www.ietf.org/\n";
+    char *Connect = "Connection: close\n";
+    char *Enter   = "\n";
+
+    /* ソケットの生成 */
+    if ((sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))<0) {
+        perror("socket");
+        exit(1);
+    }
+
+    /* host(ソケットの接続先) の情報設定 */
+    bzero(&host,sizeof(host));
+    host.sin_family=AF_INET;
+    host.sin_addr.s_addr=htonl(INADDR_ANY);
+    host.sin_port=htons(3128);
+
+    if ((hp = gethostbyname("cacheserv.ics.es.osaka-u.ac.jp")) == NULL) {
+        fprintf(stderr,"unknown host %s\n",argv[1]);
+        exit(1);
+    }
+    bcopy(hp->h_addr,&host.sin_addr,hp->h_length);
+
+    if (connect(sock, (struct sockaddr*)&host, sizeof(host)) < 0) {
+        perror("connect");
+        exit(2);
+    }
+
+    /* コマンド送信 */
+    write(sock, Get,     strlen(Get));
+    write(sock, Host,    strlen(Host));
+    write(sock, Connect, strlen(Connect));
+    write(sock, Enter,   strlen(Enter));
+
+    do {
+        if ((nbytes = read(sock, rbuf, sizeof(rbuf))) < 0 ) {
+            perror("reseive");
+        } else {
+            write(1, rbuf, nbytes);
+        }
+    } while (nbytes != 0);
+
+    close(sock);
+    printf("closed\n");
+
+}

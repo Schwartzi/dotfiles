@@ -1,0 +1,65 @@
+# -*- coding: utf-8 -*-
+require 'socket'
+
+# ---- c1 初期状態 ----------------
+# 引数の確認
+if ARGV.size != 2 then
+    puts "Usage: #{$0} servername username"
+    exit
+end
+
+
+# ソケットの生成
+sock = TCPSocket.open(ARGV[0], 10140)
+
+
+# ---- c2 参加 ------------------
+if (rbuf = sock.gets) == "REQUEST ACCEPTED\n" then
+    print rbuf
+else
+    sock.close
+    print "ERROR! c2 : #{rbuf}"
+end
+
+
+# ---- c3 ユーザー名登録 ----------
+sock.print  "#{ARGV[1]}\n"
+if (rbuf = sock.gets) == "USERNAME REGISTERED\n" then
+    print rbuf
+else
+    sock.close
+    print "ERROR! c3 : #{rbuf}"
+end
+
+
+# ---- c4 メッセージ送受信 --------
+while true
+  # 標準入力とソケットからの受信を同時に監視する
+    rfds = IO.select([STDIN, sock])
+
+    rfds[0].each do |d|
+        case d
+
+        when STDIN # 標準入力から入力があったなら
+            unless STDIN.eof? # EOFでない時 サーバーに送信
+                sock.print STDIN.gets
+            else              # EOFの時 ソケットを閉じて終了
+                sock.close
+                puts "ctrl+D を受付ました。"
+                exit
+            end
+
+        when sock  # ソケットから受信したなら
+            unless sock.eof? # EOFでない時 受信して出力
+                print sock.gets
+            else             # EOFの時 ソケットを閉じて終了
+                sock.close
+                exit
+            end
+        end
+    end
+end
+
+#参考文献
+#irbから学ぶRubyの並列処理 ~ forkからWebSocketまで 13/07/19
+#http://melborne.github.io/2011/09/29/irb-Ruby-fork-WebSocket/

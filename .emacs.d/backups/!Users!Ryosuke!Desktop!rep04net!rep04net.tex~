@@ -1,0 +1,142 @@
+\documentclass{icsreport}
+
+\title{情報ネットワーク レポート第4回課題} % 題目
+\author{谷村亮介}                      % 提出者名
+\date{平成25年7月16日(火)}                  % 提出日
+
+\課題名{TCPの改変について}     % 課題名
+\担当教官{長谷川剛}                       % 担当教官名
+\所属{ソフトウェア科学コース}             % 自分の所属するコース名などを指定する.
+\学年{3年}                             % 学年
+\学籍番号{09B11044}                    % 学籍番号
+                                      % 班やグループ名.
+                                      % 必要なければ指定しなくてもよい.
+\email{u549298j@ecs.osaka-u.ac.jp}    % 電子メールのアドレス
+
+\usepackage{ascmac}
+\usepackage{here}
+\usepackage{txfonts}
+\usepackage{listings, jlisting}
+\usepackage{color}
+\usepackage[dvips]{graphicx}
+
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{colFunc}{rgb}{1,0.07,0.54}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\definecolor{Brown}{cmyk}{0,0.81,1,0.60}
+\definecolor{colID}{rgb}{0.63,0.44,0}
+
+\lstdefinelanguage{ASM}{
+morekeywords={LDHX, TXS, CLI, LDA, STA, AND, BEQ, BRA,
+              INCA, CMP, feed_watchdog},%
+morecomment=[l]{;},%
+morestring=[b]",%"
+}
+
+\renewcommand{\lstlistingname}{リスト}
+\lstset{language=ASM,
+  backgroundcolor={\color[gray]{.95}},%
+  basicstyle=\sffamily\scriptsize,
+  keywordstyle={\bfseries \color{OliveGreen}},
+  frame=tRBl,
+  framesep=5pt,
+  showstringspaces=false,
+  numbers=left,
+  stepnumber=1,
+  numberstyle=\sffamily\tiny,
+  tabsize=2
+}
+
+\begin{document}
+\maketitle
+
+\section{課題内容}
+
+TCP はトランスポート層のプロトコルであるため、エンド端末上に実装されている。
+そのため、特にオープンソースの OS (Linux、 FreeBSD など)では、
+その動作を書き換えることは容易であり、
+例えば、TCP を改造して、通常よりも高いデータ転送速度を得ることが可能である。
+この場合、改造しているTCPと改造していないTCPの間で不公平が発生する。
+この問題について、下記の 2 つの観点からどうすべきかについて議論し、
+その結果をレポートにまとめよ。
+
+\begin{enumerate}
+\item 1. TCP の改変そのものについて
+\item 2. ネットワーク側との協力の可能性について
+\end{enumerate}
+
+
+\section{解答}
+
+\subsection{TCPの改変そのものについて}
+\label{tcp}
+
+TCPの改変の例としては、
+輻輳ウィンドウサイズの増減のレート変更があげられる。
+このためには、カーネル内のソースコードのうち、
+輻輳ウィンドウサイズの増減幅と減少幅を決定しているパラメータを変更するだけで良い。
+ネットワーク内に改変TCPコネクションが増加すると、
+多くの帯域を占領して、公平性の観点から他のユーザーの通信に悪影響を与えることが考えられる。
+
+しかし、上記のような簡単な改造は上手く機能しない可能性がある。
+例えば、輻輳ウィンドウサイズの上げ幅を大きくすると輻輳ウィンドウサイズが急激に大きくなり、
+輻輳時に発生するパケット廃棄数が増加することが考えられる。
+
+[1]では、数学的解析手法とシミュレーションによって、
+上記の仮説が明らかにされている。
+具体的には、改造TCPの性質として、
+
+\begin{enumerate}
+\item 上げ幅が 3 以上の場合、再送タイムアウトが増加することによってスループットが低下すること
+\item 下げ幅を小さくすることでスループットが増大すること
+\item 下げ幅を小さくすることの効果より、上げ幅の増加によるスループットの低下の影響の方が強いこと
+\end{enumerate}
+
+などが明らかにされている。
+これによって、改造TCPの有効範囲はごく狭い領域に限られていて、
+TCPの安直な改造では、想定するような効果は得ることが出来ないことがわかった。
+
+
+\subsection{ネットワーク側との協力の可能性について}
+
+\ref{tcp}章では、
+改造TCPが通常のTCPより積極的にデータ転送を行うことで、
+逆に自身のスループットを低下させてしまうことが明らかになった。
+しかし、SACKオプションを用いることで、
+広いパラメータ領域において、
+改造TCPが有効になることが[2]で示されている。
+
+このような改造TCPと通常のTCPとの公平性を確保するためには、
+ネットワーク側の制御が必要である。
+[2]では、エッジルータでTCPパケットを観測することにより、
+TCPコネクションのウィンドウサイズやスループットを推測し、
+改造TCPコネクションを検出・制御する方法が提案されている。
+シミュレーションによる性能評価から、
+この手法を用いることにより、
+改造TCPコネクションと通常のTCPコネクションの
+スループット比を高い確率で、ほぼ1に保つことができることが示されている。
+
+この研究が今後進展し、
+実ネットワーク環境においてもこの手法の性能評価が行われれば、
+ネットワーク側と協力して、改造TCPコネクションを制御する可能性が高まるであろう。
+
+
+\begin{thebibliography}{9}
+
+\bibitem{ss}
+「改造TCPがネットワークに与える影響に関する一検討」
+``\verb+http://www.anarg.jp/achievements/web2006/pdf/j-maruyama06in-tampered-evaluation.pdf+''
+(2013/7/16アクセス)
+
+\bibitem{au}
+「エッジルータにおける改造 TCP の検出・制御手法の提案」
+``\verb+http://www.anarg.jp/achievements/web2006/pdf/j-maruyama07in-tampered-detection-control.pdf+''
+(2013/7/16アクセス)
+
+\bibitem{siryo}
+「情報ネットワーク 配布資料 第5章 トランスポート層」
+
+\end{thebibliography}
+
+\end{document}

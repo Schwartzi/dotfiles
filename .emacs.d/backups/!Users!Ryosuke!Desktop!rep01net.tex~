@@ -1,0 +1,102 @@
+\documentclass{icsreport}
+
+\title{情報ネットワーク レポート第1回課題} % 題目
+\author{谷村亮介}                      % 提出者名
+\date{平成25年5月14日(火)}                  % 提出日
+
+\課題名{PHSとツイッターの災害時の強さについて}     % 課題名
+\担当教官{村田正幸}                       % 担当教官名
+\所属{ソフトウェア科学コース}             % 自分の所属するコース名などを指定する.
+\学年{3年}                             % 学年
+\学籍番号{09B11044}                    % 学籍番号
+                                      % 班やグループ名.
+                                      % 必要なければ指定しなくてもよい.
+\email{u549298j@ecs.osaka-u.ac.jp}    % 電子メールのアドレス
+
+\usepackage{ascmac}
+\usepackage{here}
+\usepackage{txfonts}
+\usepackage{listings, jlisting}
+\usepackage{color}
+\usepackage[dvips]{graphicx}
+
+
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{colFunc}{rgb}{1,0.07,0.54}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\definecolor{Brown}{cmyk}{0,0.81,1,0.60}
+\definecolor{colID}{rgb}{0.63,0.44,0}
+
+\lstdefinelanguage{ASM}{
+morekeywords={LDHX, TXS, CLI, LDA, STA, AND, BEQ, BRA,
+              INCA, CMP, feed_watchdog},%
+morecomment=[l]{;},%
+morestring=[b]",%"
+}
+
+\renewcommand{\lstlistingname}{リスト}
+\lstset{language=ASM,
+  backgroundcolor={\color[gray]{.95}},%
+  basicstyle=\sffamily\scriptsize,
+  keywordstyle={\bfseries \color{OliveGreen}},
+  frame=tRBl,
+  framesep=5pt,
+  showstringspaces=false,
+  numbers=left,
+  stepnumber=1,
+  numberstyle=\sffamily\tiny,
+  tabsize=2
+}
+
+\begin{document}
+\maketitle
+
+\section{PHSが災害に強いって本当?}
+
+\subsection{解答}
+
+今回は日本のPHS事業社であるウィルコムの通信網を例にとって、
+他の携帯電話キャリアと比較した時の、
+PHSの災害に対する強さを考える。
+
+一般的な携帯電話では一つの基地局が広範囲をカバーするマクロセル方式
+が採用されている。
+このため、災害時に基地局が故障した時や、
+通信が集中した時には、つながりにくくなってしまう。
+これに対して、ウィルコムのネットワークは、
+複数の基地局が一つのエリアをカバーするマイクロセル方式を採用している。
+このため、ある基地局に障害が発生しても、他の基地局でカバーすることができるので、
+PHSは一般的な携帯電話に比べて災害時でもつながりやすいといえる。
+
+
+\section{ツイッターが災害に強いって本当?}
+
+\subsection{解答}
+
+ツイッターは、インターネット回線を利用した情報通信サービスである。
+インターネットは電話通信のように、つながっている間に回線を専有し続けるのではなく、
+データをパケット単位に分割して、最適なルートを選択して通信を行うことができる。
+従って、災害時に携帯電話が繋がりにくいときでも、
+インターネットは使えるという状況がよく起こる。
+
+インターネットを用いた情報通信サービスは複数あるが、
+その中でも特にツイッターは、
+自分の無事をツイートするだけで、
+フォロワーに無事を伝えることができる、
+というシンプルさの点で、災害時には強いと言える。
+またツイッターには、災害時に地域の情報を入手したり、
+救助を要請するための機能が準備されていて、
+災害時の使いやすさに優れているといえる。
+
+
+\section{まとめ}
+
+ここまで、災害時の様々な情報通信手段について調べてきたが、
+ツイッターなど、インターネットを用いた通信が最も確実であると感じた。
+また、情報通信の仕組み上、携帯電話よる電話通信はできるだけ避けたほうが良い事もわかった。
+
+なにより最も重要なことは、
+複数のルートから最適なルートを選択できるインターネット通信のように、
+緊急時のために、様々な通信手段を予め用意しておくことだと思う。
+
+\end{document}
