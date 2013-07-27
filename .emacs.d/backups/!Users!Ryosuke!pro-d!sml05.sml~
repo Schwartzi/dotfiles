@@ -1,4 +1,0 @@
-fun id x = x;
-fn x => id id x;
-
-fun twice f x = f (f x);

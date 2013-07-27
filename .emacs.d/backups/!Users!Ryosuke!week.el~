@@ -1,3 +1,0 @@
-(defun week (day)
-  (interactive)
-  (insert day))

@@ -1,5 +1,0 @@
-require 'socket'
-
-s = TCPSocket.open("localhost", 10140)
-s.puts("test")
-s.close

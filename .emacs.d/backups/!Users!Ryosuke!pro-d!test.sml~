@@ -1,4 +1,0 @@
-fun A n =
-    if 0 then 1
-    else 2 * A(n -1) + 1;
-              
