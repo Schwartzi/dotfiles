@@ -1,6 +1,5 @@
 export LANG=ja_JP.UTF-8
 
-
 ## ---- 補完 ---------------------------
 
 autoload -U compinit
@@ -11,10 +10,6 @@ setopt correct
 
 # 補完候補を詰めて表示する
 setopt list_packed
-
-# 先方予測
-#autoload predict-on
-#predict-on
 
 # 補完で小文字でも大文字にマッチさせる
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
@@ -55,7 +50,7 @@ zle -N history-beginning-search-forward-end history-search-end
 bindkey "^P" history-beginning-search-backward-end
 bindkey "^N" history-beginning-search-forward-end
 
-
+# --- その他の設定 ---------------------
 
 # 改行のない出力をプロンプトで上書きするのを防ぐ
 unsetopt promptcr
@@ -66,7 +61,9 @@ setopt nolistbeep
 # 日本語ファイル名を表示可能にする
 setopt print_eight_bit
 
-# 色の設定
+
+
+# --- 色の設定 -------------------------
 export LSCOLORS=exfxcxdxbxegedabagacad
 export LS_COLORS='di=34:ln=35:so=32:pi=33:ex=31:bd=46;34:
                   cd=43;34:su=41;30:sg=46;30:tw=42;30:ow=43;30'
@@ -77,18 +74,11 @@ alias gls="gls --color"
 zstyle ':completion:*' list-colors 'di=34' 'ln=35' 'so=32' 'ex=31' 'bd=46;34' 'cd=43;34'
 
 # ---- プロンプト ----------------------
-# http://www.clear-code.com/blog/2011/9/5.html
-
-#PROMPT="%B%{[34m%}%(#.#.%%)%{[m%}%b "
-#autoload promptinit
-#promptinit
-#prompt bart cyan
 
 setopt prompt_subst
 
 autoload colors
 colors
-
 
 ## --- 右プロンプト --------
 # VCSの情報を取得するzshの便利関数 vcs_infoを使う
@@ -100,12 +90,8 @@ autoload -Uz vcs_info
 zstyle ':vcs_info:*' formats '(%s)-[%b]'
 zstyle ':vcs_info:*' actionformats '(%s)-[%b|%a]'
 
-
-
-
 ## --- ミスプロンプト --------
 SPROMPT="%{[31m%}%r is correct? [n,y,a,e]:%{[m%} "
-
 
 ## --- 左プロンプト --------
 local pbLeft="%n@%m %F{blue}[%~]%f"
@@ -114,8 +100,7 @@ local pbRight="%F{cyan}%D %T%f"
 local pMark="%B%(?,%F{green},%F{red})%(!,#,>)%f%b"
 
 
-## プロンプトフォーマットを展開した後の文字数を返す。
-## 日本語未対応。
+## プロンプトフォーマットを展開した後の文字数を返す
 countPChars(){
     print -n -P -- "$1" | sed -e $'s/\e\[[0-9;]*m//g' | wc -m | sed -e 's/ //g'
 }
